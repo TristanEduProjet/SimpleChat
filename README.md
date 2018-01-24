@@ -1,2 +1,41 @@
 # SimpleChat
 Client/Serveur de chat
+
+## Résumé du [sujet](https://github.com/gamazeps/esgi/blob/master/project.md)
+Projet de C++ consistant en un serveur +client de chat (comme irc, slack , etc...), mais en plus "simple".
+
+Fonctionnalités requises :
+  - [ ] un serveur central
+    - [ ] déconnecte un client si la connexion est perdu/fermée (tolérance ~1 min)
+    - [ ] chaque client peut se connecter (même si autre(s) client(s) déjà connecté(s))
+    - [ ] communication minimale avec un "canal" général/commun à tous le monde
+    - [ ] notifie des (dé)connexions des clients
+    - [ ] doit être capable d'accepter au minimum 20 connections en parallèle
+    - [ ] doit pouvoir envoyer les messages aux clients en moins d'une seconde
+  - [ ] un client
+    - [ ] permet d'écrire & envoyer messages au serveur
+    - [ ] permet de recevoir & afficher des messages du serveur
+    - [ ] les clients se connectent avec la même commande
+    - [ ] si programme interrompu, doit être déconnecté du serveur
+    - [ ] informe des (dé)connexions (du serveur/channel)
+
+Contraintes :
+  - [ ] Les dépendances doivent être explicites et résolue dans la phase d’installation
+  - [ ] doit être compilable et lançable sous linux (Ubuntu 16.04 LTS)
+  - [ ] doit être testé (coverage de 50% minimum)
+  - [ ] doit passer le test de memcheck (valgrind)
+  - [x] _doit être versionné sous git_
+  - [ ] doit avoir une intégration continue
+  - [ ] pas de GUI graphique (utilisable en console)
+
+> La contrainte d’ordonnancement des messages est la suivante: si un client U envoie le message `m1` puis le message `m2`, les autres clients doivent les recevoir dans cet ordre. Cependant il n'y a pas de priorité entre les clients.
+
+> Vous devez pouvoir montrer que des clients sur différentes machines peuvent communiquer via ce serveur (machines virtuelles sur la même machine physique autorisées).
+
+Fonctionnalités supplémentaires :
+  - [ ] Sauvegarder l'historique des conversations sur le serveur (dans un fichier ou une base de données)
+  - [ ] Vérifier que deux clients n'ont pas le même identifiant
+  - [ ] Gérer les connexion de manière multi-threadé
+  - [ ] Permettre aux clients de demander l'historique
+  - [ ] Permettre l'envoi de messages personnels (visibles uniquement entre les deux clients concernés)
+  - [ ] Permettre la création de canaux de discussions par les clients (channels sur irc/slacks)

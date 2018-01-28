@@ -23,7 +23,6 @@ jobs:
               pwd
               uname -a
               uname -m
-              lsb_release -a
               gcc --version
               make --version
               cmake --version

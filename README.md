@@ -1,8 +1,10 @@
 # SimpleChat
 Client/Serveur de chat
 
+[![CircleCI](https://circleci.com/gh/TristanEduProjet/SimpleChat.svg?style=svg)](https://circleci.com/gh/TristanEduProjet/SimpleChat)
+
 ## Résumé du [sujet](https://github.com/gamazeps/esgi/blob/master/project.md)
-Projet de C++ consistant en un serveur +client de chat (comme irc, slack , etc...), mais en plus "simple".
+Projet de C++ consistant en un serveur +client de chat (comme IRC, Slack , etc...), mais en plus "simple".
 
 Fonctionnalités requises :
   - [x] un serveur central
@@ -21,7 +23,7 @@ Fonctionnalités requises :
 
 Contraintes :
   - [x] Les dépendances doivent être explicites et résolue dans la phase d’installation
-  - [ ] doit être compilable et lançable sous linux (Ubuntu 16.04 LTS)
+  - [x] doit être compilable et lançable sous linux (Ubuntu 16.04 LTS)
   - [ ] doit être testé (coverage de 50% minimum)
   - [ ] doit passer le test de memcheck (valgrind)
   - [x] _doit être versionné sous git_

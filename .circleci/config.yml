@@ -6,9 +6,10 @@ config_env: &defaults
 version: 2
 jobs:
   build:
+    <<: *defaults
     docker:
-      # xenial = 16.04
-      - image: ubuntu:xenial
+      # 16.04 = xenial
+      - image: ubuntu:16.04
     steps:
       - run:
           name: Update & Complete environnement

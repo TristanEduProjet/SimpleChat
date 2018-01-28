@@ -5,14 +5,14 @@ Client/Serveur de chat
 Projet de C++ consistant en un serveur +client de chat (comme irc, slack , etc...), mais en plus "simple".
 
 Fonctionnalités requises :
-  - [ ] un serveur central
+  - [x] un serveur central
     - [ ] déconnecte un client si la connexion est perdu/fermée (tolérance ~1 min)
     - [ ] chaque client peut se connecter (même si autre(s) client(s) déjà connecté(s))
     - [ ] communication minimale avec un "canal" général/commun à tous le monde
     - [ ] notifie des (dé)connexions des clients
     - [ ] doit être capable d'accepter au minimum 20 connections en parallèle
     - [ ] doit pouvoir envoyer les messages aux clients en moins d'une seconde
-  - [ ] un client
+  - [x] un client
     - [ ] permet d'écrire & envoyer messages au serveur
     - [ ] permet de recevoir & afficher des messages du serveur
     - [ ] les clients se connectent avec la même commande
@@ -20,7 +20,7 @@ Fonctionnalités requises :
     - [ ] informe des (dé)connexions (du serveur/channel)
 
 Contraintes :
-  - [ ] Les dépendances doivent être explicites et résolue dans la phase d’installation
+  - [x] Les dépendances doivent être explicites et résolue dans la phase d’installation
   - [ ] doit être compilable et lançable sous linux (Ubuntu 16.04 LTS)
   - [ ] doit être testé (coverage de 50% minimum)
   - [ ] doit passer le test de memcheck (valgrind)
@@ -39,3 +39,34 @@ Fonctionnalités supplémentaires :
   - [ ] Permettre aux clients de demander l'historique
   - [ ] Permettre l'envoi de messages personnels (visibles uniquement entre les deux clients concernés)
   - [ ] Permettre la création de canaux de discussions par les clients (channels sur irc/slacks)
+
+
+## Requirements
+Le projet nécessite :
+  - lors de la compilation :
+      - CMake (3.x)
+      - make
+      - MinGW sous Windows
+      - GCC/CLang/? sous Linux
+  - pour le programme :
+      - ...
+
+## Build
+CMake se charge de tester et gérer les dépendances du projet.  
+Les seules commandes sont :
+
+En debug _(par défault)_ :
+```bash
+cmake -G"<Generator>" -Wdeprecated .
+make
+```
+
+En release :
+```bash
+cmake -G"<Generator>" -DCMAKE_BUILD_TYPE=Release .
+make
+```
+
+`<Generator>` correspond suivant le système à :
+  - `MinGW Makefiles` sous Windows
+  - `Unix Makefiles` sous Linux (sauf si vous voulez compilez les binaires pour windows avec mingw)

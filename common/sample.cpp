@@ -1,16 +1,19 @@
-// The functions contained in this file are pretty dummy
-// and are included only as a placeholder. Nevertheless,
-// they *will* get included in the shared library if you
-// don't remove them :)
-// 
-// Obviously, you 'll have to write yourself the super-duper
-// functions to include in the resulting library...
-// Also, it's not necessary to write every function in this file.
-// Feel free to add more files in this project. They will be
-// included in the resulting library.
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netdb.h>
+#include <time.h>
 
 extern "C"
 {
+    // Fermeture de la socket //
+    close( socketRecepteur );
+
     // A function adding two integers and returning the result
     int SampleAddInt(const int i1, const int i2)
     {

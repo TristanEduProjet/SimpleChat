@@ -17,7 +17,7 @@ int main(const int argc, const char *argv[])
     bzero( &adresseRecepteur, sizeof(adresseRecepteur) );
     adresseRecepteur.sin_family = AF_INET;
     adresseRecepteur.sin_port = htons( 5669 ); // <-- port
-    adresseRecepteur.sin_addr.s_addr = inet_addr( "172.22.17.1" );
+    adresseRecepteur.sin_addr.s_addr = inet_addr( real_ip().c_str() );
 
     // Attachement de l'adresse à la socket du recepteur //
     bind(socketRecepteur,(struct sockaddr*)&adresseRecepteur,sizeof(adresseRecepteur));
@@ -34,8 +34,19 @@ int main(const int argc, const char *argv[])
     char *requete = "PREMIER MESSAGE ENVOYE PAR LE SERVEUR";
     int n = write(accepter,requete,strlen(requete));
     if ( n < 0 )
-      perror("ERREUR d'écriture sur la socket\n");
-    printf("Requête envoyée :\n%s\n",requete);
+      cout << "ERREUR d'écriture sur la socket" << endl;
+    cout << "Requête envoyée :" << endl << requete << endl;
+
+    while(1)
+    {
+       // Réceptionne et affiche la réponse du serveur
+       bzero(reponse, 2048); // Nettoyage du tampon de réception
+       printf("Attente de réponse...\n");
+       int n2 = read(accepter,reponse,2048);
+       if ( n2 < 0 ) cout << "ERREUR de lecture depuis la socket" << endl;
+       printf( "Reçu %do : \n%s\n", n2, reponse );
+       sleep(1);
+    }
 
     // Fermeture de la socket //
     close( socketRecepteur );

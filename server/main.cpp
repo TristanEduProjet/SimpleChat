@@ -37,7 +37,8 @@ int main(const int argc, const char *argv[])
       cout << "ERREUR d'écriture sur la socket" << endl;
     cout << "Requête envoyée :" << endl << requete << endl;
 
-    while(1)
+    bool connected = true;
+    while(connected)
     {
        // Réceptionne et affiche la réponse du serveur
        bzero(reponse, 2048); // Nettoyage du tampon de réception
@@ -45,7 +46,7 @@ int main(const int argc, const char *argv[])
        int n2 = read(accepter,reponse,2048);
        if ( n2 < 0 ) cout << "ERREUR de lecture depuis la socket" << endl;
        printf( "Reçu %do : \n%s\n", n2, reponse );
-       sleep(1);
+       if(!n2)connected=false;
     }
 
     // Fermeture de la socket //

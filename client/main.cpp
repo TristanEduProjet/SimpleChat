@@ -3,19 +3,63 @@
 #include <cstdbool>
 #include <stdlib.h>
 #include <curses.h>
+#include <thread>
 #include "common/sample.hpp"
 
 using namespace std;
 
+bool connected = true;
+string servaddr;
+string lines[12];
+
+void ReadData()
+{
+    struct sockaddr_in adresseRecepteur, adresseEmetteur;
+    char reponse[2048];
+
+    // Création d'une socket TCP //
+    int socketRecepteur = socket( AF_INET, SOCK_STREAM, 0 );
+
+    // Configuration de l'adresse du serveur //
+    bzero( &adresseRecepteur, sizeof(adresseRecepteur) );
+    adresseRecepteur.sin_family = AF_INET;
+    adresseRecepteur.sin_port = htons( 5669 ); // <-- port
+    adresseRecepteur.sin_addr.s_addr = inet_addr( servaddr.c_str() );
+
+    // Attachement de l'adresse à la socket du recepteur //
+    bind(socketRecepteur,(struct sockaddr*)&adresseRecepteur,sizeof(adresseRecepteur));
+
+    int listener = listen(socketRecepteur,1);
+
+    socklen_t addrlen = sizeof(adresseEmetteur);
+    // Tentative de connexion au serveur //
+    int accepter = accept(socketRecepteur,(struct sockaddr*)&adresseEmetteur,&addrlen);
+
+    // Envoi de la requête au serveur //
+    char *requete = "PREMIER MESSAGE ENVOYE PAR LE SERVEUR";
+    int n = write(accepter,requete,strlen(requete));
+
+    while(connected)
+    {
+       // Réceptionne et affiche la réponse du serveur
+       bzero(reponse, 2048); // Nettoyage du tampon de réception
+       int n2 = read(accepter,reponse,2048);
+       for(int a=0;a<10;a++){
+           lines[a] = lines[a+1];
+       }
+       lines[9] = reponse;
+       if(!n2)connected=false;
+    }
+
+
+}
+
 int main(const int argc, const char *argv[])
 {
-    bool connected = true;
     char entry[2048];
     struct sockaddr_in adresseServeur;
-    string servaddr;
     string user;
     char begin[256];
-    string lines[9];
     WINDOW * mainwin;
 
     cout << "NOM D'UTILISATEUR:" << endl;
@@ -45,37 +89,48 @@ int main(const int argc, const char *argv[])
         cout << "Erreur initialisation ncurses" << endl;
         exit(EXIT_FAILURE);
     }
+    start_color();
+    init_pair(1, COLOR_BLACK, COLOR_RED);
+    init_pair(2, COLOR_WHITE, COLOR_BLACK);
+    init_pair(3, COLOR_BLUE, COLOR_WHITE);
+    init_pair(4, COLOR_BLACK, COLOR_GREEN);
+
+    attron(COLOR_PAIR(4));
 
     mvaddstr(1, 1, "SimpleChat Client v1.0 - Groupe 6 - Nicolas Baptista / Tristan Chuine / Pierre-Henry Langlois");
-    for(int a=2,b=0;a<12;a++,b++){
-        char ligne[256];
-        sprintf(ligne, "message ligne %d",a);
-        //lines[b] = sprintf(ligne, "message ligne %d",a);
-        mvaddstr(a,1,ligne);
-    }
-    mvaddstr(12,1,"===========================================================");
 
+    for(int a=2,b=0;a<12;a++,b++){
+        lines[b] = "";
+    }
+    attron(COLOR_PAIR(2));
+    mvhline(12, 1, '-', 70);
+    attron(COLOR_PAIR(1));
+    mvaddnstr(13,1,user.c_str(),10);
 
     refresh();
 
+    std::thread(ReadData);
     while(connected)
     {
-        mvaddstr(13,11,"                                                                                      "); // On clean
-        mvaddnstr(13,1,user.c_str(),10);
+        attron(COLOR_PAIR(2));
+        for(int a=2,b=0;a<12;a++,b++){
+            //char ligne[256];
+            //sprintf(ligne, "%s", lines[b]);
+            mvaddstr(a,1,lines[b].c_str());
+        }
+
+        attron(COLOR_PAIR(3));
+        mvhline(13, 11, ' ', 60); // On clean
         move(13,11); // Curseur pour l'écriture
         // ecriture du message
         getstr(entry);
-        /*for(int a=2,b=0;a<11;a++,b++){
-            lines[b] = lines[b+1];
-            char ligne[256];
-            sprintf(ligne, "%s",lines[b]);
-            mvaddstr(a,1,ligne);
+        /*for(int a=0;a<10;a++){
+            lines[a] = lines[a+1];
         }
-        char newline[256];
-        sprintf(newline, "%s%s",begin,entry);
-        mvaddstr(12,1,newline);*/
-        // Envoi de la requête au serveur
+        lines[9] = begin;
+        lines[9].append(entry);*/
 
+        // Envoi de la requête au serveur
         int ret = write( socketClient, begin, strlen(begin) );
         if ( ret < 0 )connected = false;
         int ret2 = write( socketClient, entry, strlen(entry) );

@@ -17,6 +17,8 @@ stdlib.h
 -
 curses.h
 -
+thread
+-
 common/sample.hpp
 /root/SimpleChat/client/common/sample.hpp
 

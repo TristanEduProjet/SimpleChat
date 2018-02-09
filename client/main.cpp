@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdbool>
+#include <stdlib.h>
+#include <curses.h>
 #include "common/sample.hpp"
 
 using namespace std;
@@ -12,9 +14,15 @@ int main(const int argc, const char *argv[])
     struct sockaddr_in adresseServeur;
     string servaddr;
     string user;
+    char begin[256];
+    string lines[9];
+    WINDOW * mainwin;
 
     cout << "NOM D'UTILISATEUR:" << endl;
     cin >> user;
+
+    sprintf(begin,"%s",user.c_str());
+    strcat((char *)begin," a dit:");
 
     /* Création d'une socket TCP */
     int socketClient = socket( AF_INET, SOCK_STREAM, 0 );
@@ -32,32 +40,60 @@ int main(const int argc, const char *argv[])
         cout << "Impossible d'établir une connexion" << endl;
     cout << "Connexion établie" << endl;
 
-    const char * begin = user.c_str();
-    strcat((char *)begin," a dit:");
+    /*  Init ncurses  */
+    if ( (mainwin = initscr()) == NULL ) {
+        cout << "Erreur initialisation ncurses" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    mvaddstr(1, 1, "SimpleChat Client v1.0 - Groupe 6 - Nicolas Baptista / Tristan Chuine / Pierre-Henry Langlois");
+    for(int a=2,b=0;a<12;a++,b++){
+        char ligne[256];
+        sprintf(ligne, "message ligne %d",a);
+        //lines[b] = sprintf(ligne, "message ligne %d",a);
+        mvaddstr(a,1,ligne);
+    }
+    mvaddstr(12,1,"===========================================================");
+
+
+    refresh();
 
     while(connected)
     {
-        cout << user << ">";
-
-        //begin[0] = '\0'; // initialisation
-        // envoi du message
-        fgets(entry, 2048, stdin);
-
-        /* Envoi de la requête au serveur */
+        mvaddstr(13,11,"                                                                                      "); // On clean
+        mvaddnstr(13,1,user.c_str(),10);
+        move(13,11); // Curseur pour l'écriture
+        // ecriture du message
+        getstr(entry);
+        /*for(int a=2,b=0;a<11;a++,b++){
+            lines[b] = lines[b+1];
+            char ligne[256];
+            sprintf(ligne, "%s",lines[b]);
+            mvaddstr(a,1,ligne);
+        }
+        char newline[256];
+        sprintf(newline, "%s%s",begin,entry);
+        mvaddstr(12,1,newline);*/
+        // Envoi de la requête au serveur
 
         int ret = write( socketClient, begin, strlen(begin) );
-        if ( ret < 0 ) cout << "ERREUR d'écriture sur la socket" << endl;
+        if ( ret < 0 )connected = false;
         int ret2 = write( socketClient, entry, strlen(entry) );
-        if ( ret2 < 0 ) cout << "ERREUR d'écriture sur la socket" << endl;
+        if ( ret2 < 0 )connected = false;
 
         if(strcmp(entry,"exit\n") == 0){
             connected = false;
         }
-        cout << endl;
     }
+
 
     /* Fermeture de la socket */
     close( socketClient );
+
+    /* Fermeture NCurses */
+    delwin(mainwin);
+    endwin();
+    refresh();
 
     return EXIT_SUCCESS;
 }

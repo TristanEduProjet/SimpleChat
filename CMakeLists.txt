@@ -53,10 +53,12 @@ if(BUILD_SERVER)
 endif()
 
 if(BUILD_CLIENT)
+    find_package(Curses REQUIRED)
     file(GLOB_RECURSE cli_src_files ${CMAKE_SOURCE_DIR}/client/*)
     add_executable(schatCli ${cli_src_files})
     target_include_directories(schatCli PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/client)
-    target_link_libraries(schatCli LINK_PUBLIC SChat)
+    target_include_directories(schatCli PUBLIC ${CURSES_INCLUDE_DIR})
+    target_link_libraries(schatCli LINK_PUBLIC ${CURSES_LIBRARIES} SChat)
 endif()
 
 set(CONFIGURED_ONCE TRUE CACHE INTERNAL "A flag showing that CMake has configured at least once.")

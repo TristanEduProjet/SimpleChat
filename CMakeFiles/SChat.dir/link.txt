@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -Wall -Wextra -ggdb3 -O1 -D DEBUG -D NPREFETCH  -shared -Wl,-soname,libSChat.so -o build/Debug/libSChat.so CMakeFiles/SChat.dir/common/sample.cpp.o 

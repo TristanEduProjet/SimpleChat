@@ -1,1 +1,0 @@
-/usr/bin/c++  -Wall -Wextra -ggdb3 -O1 -D DEBUG -D NPREFETCH  -rdynamic CMakeFiles/schatSrv.dir/server/main.cpp.o  -o build/Debug/schatSrv -Wl,-rpath,/root/SimpleChat/build/Debug build/Debug/libSChat.so 

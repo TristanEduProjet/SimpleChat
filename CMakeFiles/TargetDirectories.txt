@@ -1,5 +1,0 @@
-/root/SimpleChat/CMakeFiles/rebuild_cache.dir
-/root/SimpleChat/CMakeFiles/edit_cache.dir
-/root/SimpleChat/CMakeFiles/schatCli.dir
-/root/SimpleChat/CMakeFiles/SChat.dir
-/root/SimpleChat/CMakeFiles/schatSrv.dir

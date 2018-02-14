@@ -1,18 +1,16 @@
 #ifndef MAIN_HPP_INCLUDED
 #define MAIN_HPP_INCLUDED
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#include <string>
+/*
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <netdb.h>
 #include <time.h>
-
-using namespace std;
+*/
 
 extern "C"
 {

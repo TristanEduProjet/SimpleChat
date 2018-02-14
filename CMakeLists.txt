@@ -39,6 +39,9 @@ if(NOT CONFIGURED_ONCE)
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -ggdb3 -D NDEBUG -D NPREFETCH" CACHE STRING "Flags used by the compiler during relwithdebinfo." FORCE)
 endif()
 
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 file(GLOB_RECURSE lib_src_files ${CMAKE_SOURCE_DIR}/common/*)
 add_library(SChat SHARED ${lib_src_files})
 target_include_directories(SChat PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/common)
@@ -50,6 +53,7 @@ if(BUILD_SERVER)
     add_executable(schatSrv ${srv_src_files})
     target_include_directories(schatSrv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/server)
     target_link_libraries(schatSrv LINK_PUBLIC SChat)
+    target_link_libraries(schatSrv LINK_PUBLIC Threads::Threads)
 endif()
 
 if(BUILD_CLIENT)

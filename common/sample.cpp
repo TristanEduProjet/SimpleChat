@@ -13,7 +13,7 @@ extern "C"
         struct ifaddrs * ifAddrStruct=NULL;
         struct ifaddrs * ifa=NULL;
         void * tmpAddrPtr=NULL;
-        string myip;
+        std::string myip;
 
         getifaddrs(&ifAddrStruct);
 
@@ -57,7 +57,7 @@ extern "C"
     int SampleFunction2()
     {
         // insert code here
-        
+
         return 0;
     }
 }

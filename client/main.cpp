@@ -1,6 +1,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdbool>
+#include <cstring>
+#include <sys/socket.h>
+#include <netinet/in.h>
+extern "C" {
+    #include <unistd.h>
+}
+#include <arpa/inet.h>
 #include "common/sample.hpp"
 
 using namespace std;
@@ -13,13 +20,13 @@ int main(const int argc, const char *argv[])
     string servaddr;
     string user;
 
-    cout << "NOM D'UTILISATEUR:" << endl;
+    cout << "NOM D'UTILISATEUR: ";
     cin >> user;
 
     /* Création d'une socket TCP */
     int socketClient = socket( AF_INET, SOCK_STREAM, 0 );
 
-    cout << "VEUILLEZ TAPER L'IP DU SERVEUR:" << endl;
+    cout << "VEUILLEZ TAPER L'IP DU SERVEUR: ";
     cin >> servaddr;
     /* Configuration de l'adresse du serveur */
     bzero( &adresseServeur, sizeof(adresseServeur) );

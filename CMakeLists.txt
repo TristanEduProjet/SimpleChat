@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(SimpleChat VERSION 0.0.1)
+project(SimpleChat LANGUAGES C CXX VERSION 0.0.2)
 
 option(BUILD_CLIENT "Enable building client app" ON)
 option(BUILD_SERVER "Enable building server prog" ON)

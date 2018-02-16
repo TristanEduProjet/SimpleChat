@@ -2,47 +2,34 @@
 #include <cstdlib>
 #include <cstdbool>
 #include <cstring>
-#include <thread>
 #include <list>
 #include <atomic>
 #include <csignal>
 #include "common/network.hpp"
+#if !(defined(WIN32) || defined(_WIN32))
+#include <arpa/inet.h>
+#endif // defined
 #include "common/data.hpp"
 #include "common/utils.hpp"
 #include <unistd.h>
+#include <cerrno>
+#include <utility> //as_const
+#include <algorithm> //max, max_element
+#include <thread>
+#include <chrono>
 
 std::atomic<bool> global_exit(false);
-std::list<std::thread> connections;
+std::list<SOCKET> connections;
 //msgs
 
-const static std::string welcome = "Bienvenu to the <servername> server.";
-void loop_for_client(const SOCKET socketCli, const SockAddress addrCli) {
-    const std::thread::id this_id = std::this_thread::get_id();
-    std::cout << std::this_thread::get_id() << " has socket " << socketCli << std::endl;
-    // Envoi de la requête au serveur //
-    /*int n = write(socketCli, welcome.c_str(), welcome.length());
-    if(n < 0)
-       std::cerr << "ERREUR d'écriture sur la socket" << std::endl;
-    std::cout << "Requête envoyée : " << welcome << std::endl;
+#define MAX_CLIENTS 100
+#define BUFFER_SIZE (2048+1) //2k +1
 
-    bool connected = true;
-    char reponse[2048];
-    int n2;
-    while(connected) {
-        // Réceptionne et affiche la réponse du serveur
-        memset(reponse, 0x0, 2048); // Nettoyage du tampon de réception
-        std::cout << "Attente de réponse ..." << std::endl;
-        n2 = read(socketCli, reponse, 2048);
-        if(n2 < 0)
-            std::cerr << "ERREUR de lecture depuis la socket" << std::endl;
-        std::cout << "Reçu " << n2 << " oct : " << reponse << std::endl;
-        if(!n2)
-            connected = false;
-    }*/
-    //shutdown(socketCli, 0);
-    closesocket(socketCli);
-    std::cout << "Fin du thread " << std::this_thread::get_id() << std::endl;
-}
+const static std::string welcome_msg("Server v?\r\nBienvenu to the <servername> server.\r\n");
+
+int main_wait_client(SOCKET const& socketSrv, SockAddress const& addrSrv);
+void check_new_clients(SOCKET const& socketSrv, fd_set const& readfs);
+void check_incoming_msg(fd_set const& readfs);
 
 int main(const int argc, const char *argv[])
 {
@@ -62,6 +49,9 @@ int main(const int argc, const char *argv[])
         print_net_error("Error while creating socket");
         return_code = EXIT_FAILURE;
     } else {
+        int opt = 1; //TRUE
+        if(setsockopt(socketSrv, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) != 0) //autoriser socket srv multiples connexions
+            print_net_error("Error while config server socket"); //not necessary
         std::cout << "socket " << socketSrv << " is now opened in TCP/IP mode" << std::endl;
         SockAddress addrSrv = new_socket_address(PORT);
         if(bind(socketSrv, &(addrSrv.addr), /*INET_ADDRSTRLEN*/sizeof(addrSrv.addr)) != 0) { // Attachement de l'adresse à la socket du recepteur
@@ -72,22 +62,8 @@ int main(const int argc, const char *argv[])
                 print_net_error("Problem for listening");
                 return_code = EXIT_FAILURE;
             } else {
-                ///err = clients(socketSrv);
                 std::cout << "server listening on port " << PORT << " ..." << std::endl;
-                std::cout << "wating clients ..." << std::endl;
-                SockAddress adresseEmetteur;
-                socklen_t addrlen = sizeof(adresseEmetteur.addr);
-                // Tentative de connexion au serveur //
-                while(!global_exit) {
-                    SOCKET socketCli = accept(socketSrv, &(adresseEmetteur.addr), &addrlen);
-                    if(socketCli == INVALID_SOCKET) {
-                        print_net_error("Error accepting connection");
-                        //return_code = EXIT_FAILURE;
-                    } else {
-                        std::cout << "Connexion établie " << socketCli << std::endl;
-                        connections.push_back(std::thread(loop_for_client, socketCli, adresseEmetteur));
-                    }
-                }
+                return_code = main_wait_client(socketSrv, addrSrv);
                 std::cout << "Server shutdown ..." << std::endl;
             }
         }
@@ -103,4 +79,81 @@ int main(const int argc, const char *argv[])
         WSACleanup();
     #endif
     return return_code;
+};
+
+/**
+ * Main loop gérant les sockets par la méthode `select` (évite un thread par connection et CPU à 100%)
+ */
+int main_wait_client(SOCKET const& socketSrv, SockAddress const& addrSrv)
+{
+    int return_code = EXIT_SUCCESS;
+    /// init select env
+    fd_set readfs; //set sockets descriptor(s)
+    /// Reception des connections
+    std::cout << "waiting clients ..." << std::endl;
+    SOCKET max_sd;
+    while(!global_exit) {
+        FD_ZERO(&readfs); //clean set
+        FD_SET(socketSrv, &readfs); //ajout socket srv au set
+        max_sd = socketSrv;
+        for(const auto& sd : /*std::as_const*/(connections)) { //cherche pour select
+            if(sd != INVALID_SOCKET) //si socket valide
+                FD_SET(sd, &readfs); // ajout à liste lecture
+            if(sd > max_sd)
+                max_sd = sd; // (+) descripteur, besoin pour select
+        }
+        const int res = select(max_sd+1, &readfs, NULL, NULL, NULL);
+        /*//#ifdef errno
+        //if(res < 0)
+        //#else
+        if((res < 0) and (errno != EINTR))
+        //#endif // errno
+            std::cerr << "select() error" << std::endl;*/
+        check_new_clients(socketSrv, readfs);
+        check_incoming_msg(readfs);
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+    return return_code;
+}
+
+void check_new_clients(SOCKET const& socketSrv, fd_set const& readfs)
+{
+    if(FD_ISSET(socketSrv, &readfs)) { //si event sur socket srv -> connexion entrante
+        SockAddress cliAddress;
+        socklen_t addrlen = sizeof(cliAddress.addr_in);
+        SOCKET new_cli = accept(socketSrv, &(cliAddress.addr), &addrlen);
+        if(new_cli == INVALID_SOCKET) {
+            print_net_error("Error accepting connection");
+            //exit(EXIT_FAILURE);
+        } else {
+            std::cout << "Nouvelle connexion " << new_cli << " de " << inet_ntoa(cliAddress.addr_in.sin_addr) << " sur " << ntohs(cliAddress.addr_in.sin_port) << std::endl;
+            if(send(new_cli, welcome_msg.c_str(), welcome_msg.length(), 0) != 0) {
+                print_net_error("Erreur envoie message démarrage");
+                shutdown(new_cli, SHUT_RDWR);
+                closesocket(new_cli);
+            } else
+                connections.push_back(new_cli);
+        }
+    }
+}
+
+void check_incoming_msg(fd_set const& readfs)
+{
+    /*byte*/char buffer[BUFFER_SIZE] = {0};
+    for(const auto& con : /*std::as_const*/(connections))
+        if(FD_ISSET(con, &readfs)) {
+            int resval = read(con, buffer, BUFFER_SIZE);
+            if(resval == 0) { //si fermée ou ... autre
+                SockAddress address;
+                socklen_t addrlen = sizeof(address.addr_in);
+                getpeername(con, &(address.addr), &addrlen);
+                std::cout << "Déconnexion du client " << con << " de " << inet_ntoa(address.addr_in.sin_addr) << ":" << ntohs(address.addr_in.sin_port) << std::endl;
+                connections.remove(con);
+                shutdown(con, SHUT_RDWR); //TODO: check return
+                closesocket(con); //TODO: check return
+            } else {
+                buffer[resval] = '\0'; //sécurité (obligatoire pour chaines), terminé les données par NULL
+                send(con, buffer, strlen(buffer), 0); ///TODO: add to list and dispatch with thread
+            }
+        }
 }

@@ -1,4 +1,6 @@
 #include "utils.hpp"
+#include <cstring>
+#include <arpa/inet.h>
 
 void print_error(std::string const& message) {
     #ifdef _MSC_VER
@@ -15,6 +17,27 @@ void print_net_error(std::string const& message) {
         perror(message.c_str());
     #endif
 }
+
+char const* get_ip_str(const PSOCKADDR sa, char *s, size_t maxlen)
+{
+    #if defined(WIN32) || defined(_WIN32)
+    return "<unavailable>"; //InetNTop >= Win08 ...
+    #else
+    switch(sa->sa_family) {
+        case AF_INET:
+            inet_ntop(AF_INET, &(((SOCKADDR_IN*)sa)->sin_addr), s, maxlen);
+            break;
+        /*case AF_INET6:
+            inet_ntop(AF_INET6, &(((SOCKADDR_IN6*)sa)->sin6_addr), s, maxlen);
+            break;*/
+        default:
+            strncpy(s, "Unknown AF", maxlen);
+            return NULL;
+    }
+    return s;
+    #endif // WIN32
+}
+
 
 #include <cstdio>
 #include <iostream>
@@ -94,7 +117,7 @@ void print_addrinfo(const struct addrinfo *ptr) {
             std::cout << "Other " << ptr->ai_protocol << std::endl;
             break;
     }
-    printf("\tLength of this sockaddr: %d\n", ptr->ai_addrlen);
+    printf("\tLength of this sockaddr: %zu\n", ptr->ai_addrlen);
     printf("\tCanonical name: %s\n", ptr->ai_canonname);
 }
 #endif // WIN32

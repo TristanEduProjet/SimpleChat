@@ -2,6 +2,7 @@
 #define UTILS_HPP_INCLUDED
 
 #include <string>
+#include "network.hpp"
 
 /*#if defined(__MINGW32__) || defined (__MINGW64__)
     #define std_thread  mingw_stdthread::thread
@@ -27,5 +28,7 @@
 void print_error(std::string const& message);
 void print_net_error(std::string const& message);
 #define print_wsa_error print_net_error
+
+char const* get_ip_str(const PSOCKADDR sa, char *s, size_t maxlen);
 
 #endif // UTILS_HPP_INCLUDED

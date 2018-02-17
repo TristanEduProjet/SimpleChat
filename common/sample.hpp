@@ -15,7 +15,7 @@
 extern "C"
 {
     // Retourne l'ip externe
-    std::string real_ip();
+    //std::string real_ip();
 
     // A function adding two integers and returning the result
     int SampleAddInt(const int i1, const int i2);

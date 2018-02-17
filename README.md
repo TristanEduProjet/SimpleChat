@@ -57,16 +57,22 @@ Les seules commandes sont :
 
 En debug _(par défault)_ :
 ```bash
-cmake -G"<Generator>" -Wdeprecated .
-make
+cmake -G"<Generator>" -Wdeprecated -Wdev -DCMAKE_BUILD_TYPE=Debug .
+cmake --build . [--clean-first] [--target <tgt>]
 ```
 
 En release :
 ```bash
 cmake -G"<Generator>" -DCMAKE_BUILD_TYPE=Release .
-make
+cmake --build . [--clean-first] [--target <tgt>]
 ```
 
 `<Generator>` correspond suivant le système à :
   - `MinGW Makefiles` sous Windows
   - `Unix Makefiles` sous Linux (sauf si vous voulez compilez les binaires pour windows avec mingw)
+
+`<tgt>` peut-être :
+  - `all` (_par défaut si option non utilisée_)
+  - `clean`, `help`, `rebuild_cache`, `install`
+  - `SChat`, `schatSrv` ou `schatCli`
+

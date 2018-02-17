@@ -1,9 +1,16 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdbool>
-#include <stdlib.h>
+#include <cstdlib>
 #include <curses.h>
 #include <thread>
+#include <cstring>
+#include <sys/socket.h>
+#include <netinet/in.h>
+extern "C" {
+    #include <unistd.h>
+}
+#include <arpa/inet.h>
 #include "common/sample.hpp"
 
 using namespace std;
@@ -62,7 +69,7 @@ int main(const int argc, const char *argv[])
     char begin[256];
     WINDOW * mainwin;
 
-    cout << "NOM D'UTILISATEUR:" << endl;
+    cout << "NOM D'UTILISATEUR: ";
     cin >> user;
 
     sprintf(begin,"%s",user.c_str());
@@ -71,7 +78,7 @@ int main(const int argc, const char *argv[])
     /* Création d'une socket TCP */
     int socketClient = socket( AF_INET, SOCK_STREAM, 0 );
 
-    cout << "VEUILLEZ TAPER L'IP DU SERVEUR:" << endl;
+    cout << "VEUILLEZ TAPER L'IP DU SERVEUR: ";
     cin >> servaddr;
     /* Configuration de l'adresse du serveur */
     bzero( &adresseServeur, sizeof(adresseServeur) );

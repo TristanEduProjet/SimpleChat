@@ -6,16 +6,16 @@ Projet de C++ consistant en un serveur +client de chat (comme irc, slack , etc..
 
 Fonctionnalités requises :
   - [x] un serveur central
-    - [ ] déconnecte un client si la connexion est perdu/fermée (tolérance ~1 min)
-    - [ ] chaque client peut se connecter (même si autre(s) client(s) déjà connecté(s))
-    - [ ] communication minimale avec un "canal" général/commun à tous le monde
+    - [x] déconnecte un client si la connexion est perdu/fermée (tolérance ~1 min)
+    - [x] chaque client peut se connecter (même si autre(s) client(s) déjà connecté(s))
+    - [x] communication minimale avec un "canal" général/commun à tous le monde
     - [ ] notifie des (dé)connexions des clients
-    - [ ] doit être capable d'accepter au minimum 20 connections en parallèle
-    - [ ] doit pouvoir envoyer les messages aux clients en moins d'une seconde
+    - [x] doit être capable d'accepter au minimum 20 connections en parallèle
+    - [x] doit pouvoir envoyer les messages aux clients en moins d'une seconde
   - [x] un client
-    - [ ] permet d'écrire & envoyer messages au serveur
+    - [x] permet d'écrire & envoyer messages au serveur
     - [ ] permet de recevoir & afficher des messages du serveur
-    - [ ] les clients se connectent avec la même commande
+    - [x] les clients se connectent avec la même commande
     - [ ] si programme interrompu, doit être déconnecté du serveur
     - [ ] informe des (dé)connexions (du serveur/channel)
 
@@ -26,7 +26,7 @@ Contraintes :
   - [ ] doit passer le test de memcheck (valgrind)
   - [x] _doit être versionné sous git_
   - [ ] doit avoir une intégration continue
-  - [ ] pas de GUI graphique (utilisable en console)
+  - [x] pas de GUI graphique (utilisable en console)
 
 > La contrainte d’ordonnancement des messages est la suivante: si un client U envoie le message `m1` puis le message `m2`, les autres clients doivent les recevoir dans cet ordre. Cependant il n'y a pas de priorité entre les clients.
 
@@ -35,7 +35,7 @@ Contraintes :
 Fonctionnalités supplémentaires :
   - [ ] Sauvegarder l'historique des conversations sur le serveur (dans un fichier ou une base de données)
   - [ ] Vérifier que deux clients n'ont pas le même identifiant
-  - [ ] Gérer les connexion de manière multi-threadé
+  - [x] Gérer les connexion de manière multi-threadé
   - [ ] Permettre aux clients de demander l'historique
   - [ ] Permettre l'envoi de messages personnels (visibles uniquement entre les deux clients concernés)
   - [ ] Permettre la création de canaux de discussions par les clients (channels sur irc/slacks)
@@ -57,16 +57,22 @@ Les seules commandes sont :
 
 En debug _(par défault)_ :
 ```bash
-cmake -G"<Generator>" -Wdeprecated .
-make
+cmake -G"<Generator>" -Wdeprecated -Wdev -DCMAKE_BUILD_TYPE=Debug .
+cmake --build . [--clean-first] [--target <tgt>]
 ```
 
 En release :
 ```bash
 cmake -G"<Generator>" -DCMAKE_BUILD_TYPE=Release .
-make
+cmake --build . [--clean-first] [--target <tgt>]
 ```
 
 `<Generator>` correspond suivant le système à :
   - `MinGW Makefiles` sous Windows
   - `Unix Makefiles` sous Linux (sauf si vous voulez compilez les binaires pour windows avec mingw)
+
+`<tgt>` peut-être :
+  - `all` (_par défaut si option non utilisée_)
+  - `clean`, `help`, `rebuild_cache`, `install`
+  - `SChat`, `schatSrv` ou `schatCli`
+

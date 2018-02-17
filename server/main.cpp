@@ -21,12 +21,12 @@
 
 std::atomic<bool> global_exit(false);
 void signals_handle(const int signal) {
-    std::cout << "signal capturé : exit demandé" << std::endl;
+    std::cout << "signal capturé : exit demandé, patientez ..." << std::endl;
     global_exit.store(true);
 }
 
 #define BUFFER_SIZE (2048+1) //2k +1
-
+const static TIMEVAL stv = {.tv_sec=10, .tv_usec=0};
 const static std::string welcome_msg("Server v?\r\nBienvenu to the <servername> server.\r\n");
 
 int main_wait_client(SOCKET const& socketSrv, SockAddress const& addrSrv, const std::shared_ptr<std::list<SOCKET>> &connections, const std::shared_ptr<std::queue<std::string>> &msg);
@@ -116,13 +116,13 @@ int main_wait_client(SOCKET const& socketSrv, SockAddress const& addrSrv, const 
             if(sd > max_sd)
                 max_sd = sd; // (+) descripteur, besoin pour select
         }
-        const int res = select(max_sd+1, &readfs, NULL, NULL, NULL);
-        /*//#ifdef errno
-        //if(res < 0)
-        //#else
+        const int res = select(max_sd+1, &readfs, NULL, NULL, (PTIMEVAL)&stv);
+        //#ifdef errno
         if((res < 0) and (errno != EINTR))
+        //#else
+        //if(res < -1)
         //#endif // errno
-            std::cerr << "select() error" << std::endl;*/
+            std::cerr << "select() error" << std::endl;
         check_new_clients(socketSrv, readfs, connections);
         check_incoming_msg(readfs, connections, msg);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

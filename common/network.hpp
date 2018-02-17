@@ -31,12 +31,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h> //IPPROTO_IP IPPROTO_TCP
 #include <netdb.h>
+#include <sys/time.h>
 
 /* for matching Microsoft's typedef */
 #define closesocket(s) close(s)
 typedef struct sockaddr_in SOCKADDR_IN, *PSOCKADDR_IN, *LPSOCKADDR_IN;
 typedef struct sockaddr SOCKADDR, *PSOCKADDR, *LPSOCKADDR;
 typedef struct sockaddr_storage SOCKADDR_STORAGE, *PSOCKADDR_STORAGE;
+typedef struct timeval TIMEVAL, *PTIMEVAL, *LPTIMEVAL;
 typedef int SOCKET;
 #define INVALID_SOCKET -1 //(SOCKET)(~0)
 #define SOCKET_ERROR -1

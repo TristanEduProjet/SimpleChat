@@ -1,6 +1,8 @@
 #include "utils.hpp"
 #include <cstring>
+#if !(defined(WIN32) || defined(_WIN32))
 #include <arpa/inet.h>
+#endif // defined
 
 void print_error(std::string const& message) {
     #ifdef _MSC_VER

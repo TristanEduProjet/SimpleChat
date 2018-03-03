@@ -1,0 +1,39 @@
+config_env: &defaults
+  working_directory: ~/code
+  environment:
+    LANG: fr_FR.utf8
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+    docker:
+      # 16.04 = xenial
+      - image: ubuntu:16.04
+    steps:
+      - run:
+          name: Update & Complete environnement
+          command: |
+              apt-get update
+              apt-get install -y locales
+              localedef -i fr_FR -c -f UTF-8 -A /usr/share/locale/locale.alias fr_FR.UTF-8
+              apt-get install -y build-essential gcc-5 g++-5 make cmake
+      - run:
+          name: debug env
+          command: |
+              pwd
+              uname -a
+              uname -m
+              gcc --version
+              make --version
+              cmake --version
+      - checkout
+      - run:
+          name: Run Config
+          command: cmake -G "Unix Makefiles" -Wdeprecated .
+      - run:
+          name: Run Build
+          command: make
+      - store_artifacts:
+          path: build
+          destination: build
